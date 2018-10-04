@@ -1,0 +1,35 @@
+<html>
+	<head>
+		<title> This Post </title>
+	</head>
+	<body>
+    <header>
+  <h1> This Post </h1>
+  <div class="navbar">
+    <ul>
+      <li> <a href="/posts">All Posts</a></li>
+      <li> <a href="/posts/user/<%= post.user.username %>">My Posts</a></li>
+      <li> <a href="/posts/new">New Post</a></li>
+      <li> <a href="/logout">Log Out</a></li>
+    </ul>
+  </div>
+</header>
+    <p> you are logged in as <%= post.user.username %></p>
+	   <h3>Title: <%= post.title %></h3>
+     <h6>Content: <%= post.content  %></h6>
+      <p> Poster: <%= post.user.username %> </p>
+			<% for(let i = 0; i < post.comments.length; i++) { %>
+      <h6>Comment: <%= post.comments[i].reply  %></h6>
+      <p> Commenter: <%= post.comments[i].userId %> </p>
+			<% } %>
+
+      <form action='/posts/<%= post.id %>', method='POST', autocomplete='off' id='commentform'>
+        <label>Reply </label>
+        <br>
+        <input type='text', name='comment', placeholder="comment">
+         <br>
+        <input type="submit" value="Submit">
+      </form>
+
+	</body>
+</html>

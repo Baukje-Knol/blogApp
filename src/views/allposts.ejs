@@ -1,0 +1,23 @@
+<html>
+	<head>
+		<title> All Posts </title>
+	</head>
+	<body>
+    <header>
+  <h1> All Posts </h1>
+  <div class="navbar">
+    <ul>
+      <li> <a href="../posts/user/<%= user.username %>">My Posts</a></li>
+      <li> <a href="/posts/new">New Post</a></li>
+      <li> <a href="/logout">Log Out</a></li>
+    </ul>
+  </div>
+</header>
+    <p> you are logged in as <%= user.username %></p>
+		<% for(let i = 0; i < post.length; i++) { %>
+	   <h3><a href = '/posts/<%= post[i].id %>' ><%= post[i].title %></a></h3>
+     <h6><%= post[i].content %></h6>
+       <%= post[i].user.username %>
+			 <% } %>
+	</body>
+</html>

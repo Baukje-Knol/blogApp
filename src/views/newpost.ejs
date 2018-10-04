@@ -1,0 +1,28 @@
+<html>
+	<head>
+		<title> New Post </title>
+	</head>
+	<body>
+    <header>
+  <h1> New Post </h1>
+  <div class="navbar">
+    <ul>
+      <li> <a href="/posts">All Posts</a></li>
+      <li> <a href="/posts/:username">My Posts</a></li>
+      <li> <a href="/logout">Log Out</a></li>
+    </ul>
+  </div>
+</header>
+<form action='/posts/new', method='POST', autocomplete='off' id='form'>
+  <label>Title </label>
+  <br>
+  <input type='text', name='title', placeholder="title">
+  <br>
+  <label>Content</label>
+  <br>
+  <input type='text', name='content', placeholder="content">
+   <br>
+  <input type="submit" value="Submit">
+</form>
+	</body>
+</html>

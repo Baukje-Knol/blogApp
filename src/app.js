@@ -3,9 +3,7 @@ const express = require('express')
 const session = require('express-session')
 const bodyParser = require('body-parser')
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
-
 const app = express()
-
 const sequelize = new Sequelize({
   user: process.env.POSTGRES_USER,
   password: process.env.POSTRES_PASSWORD,
@@ -20,10 +18,8 @@ const sequelize = new Sequelize({
 });
 
 app.use(express.static('public'))
-
 app.set('views', './views')
 app.set('view engine', 'ejs')
-
 app.use(bodyParser.urlencoded({
   extended: true
 }))
@@ -54,18 +50,18 @@ const User = sequelize.define('users', {
 
 const Post = sequelize.define('posts', {
   title: {
-    type: Sequelize.STRING,
+    type: Sequelize.STRING
   },
   content: {
-    type: Sequelize.STRING,
+    type: Sequelize.STRING
   }
 });
 
 const Comment = sequelize.define('comments', {
   reply: {
-    type: Sequelize.STRING,
+    type: Sequelize.STRING
   }
-})
+});
 
 User.hasMany(Post)
 Post.belongsTo(User)
@@ -75,10 +71,10 @@ User.hasMany(Comment)
 Comment.belongsTo(User)
 
 //REGISTER
-app.get('/register', (req, res)=>{
+app.get('/register', (req, res) => {
   res.render('register');
 })
-app.post('/register',(req,res)=>{
+app.post('/register', (req, res) => {
   User.create({
     username: req.body.username,
     email: req.body.email,
@@ -89,132 +85,148 @@ app.post('/register',(req,res)=>{
 });
 
 //LOG IN
-app.get('/', (req,res) =>{
+app.get('/', (req, res) => {
   res.render("login")
 })
-app.post('/', (req,res) =>{
+app.post('/', (req, res) => {
   var email = req.body.email;
   var password = req.body.password;
   User.findOne({
-    where: {
-      email: email
-    }
-  }).then(function(user){
-    if(email!== null && password === user.password){
-      req.session.user = user;
-      res.redirect('/posts');
-    } else {
-      var message = "Invalid email or password"
-      res.render("login"
-      , {message: message}
-    )
-    }
-  });
+      where: {
+        email: email
+      }
+    })
+    .then(function(user) {
+      if (email !== null && password === user.password) {
+        req.session.user = user;
+        res.redirect('/posts');
+      } else {
+        res.render("login")
+      }
+    })
+    .catch(function(error) {
+      res.redirect('/')
+    })
 });
 
 //ALLPOSTS
-app.get('/posts', (req,res) =>{
+app.get('/posts', (req, res) => {
   const user = req.session.user;
-  console.log("-----------------" + user.id)
   Post.findAll({
-    include: [{
-      model: User
-    }]
-  })
-  .then((post)=>{
-    console.log("-----------------" + user)
-    res.render('allposts', {user: user, post: post})
-  });
+      include: [{
+        model: User
+      }]
+    })
+    .then((post) => {
+      res.render('allposts', {
+        user: user,
+        post: post
+      })
+    });
 });
 
 //NEWPOST
-app.get('/posts/new',(req,res) =>{
+app.get('/posts/new', (req, res) => {
   let user = req.session.user;
-  console.log(user)
-
-  if(user=== undefined){
+  if (user === undefined) {
     res.redirect('/')
-  }else{
-    res.render("newpost");
+  } else {
+    res.render("newpost", {
+      user: user
+    });
   }
 });
-app.post('/posts/new',(req,res)=>{
+app.post('/posts/new', (req, res) => {
   var user = req.session.user.username;
   var title = req.body.title;
   var content = req.body.content;
-
   User.findOne({
-    where: {
-      username: user
-    }
-  })
-  .then(function(user){
-    return user.createPost({
-      title: title,
-      content: content
+      where: {
+        username: user
+      }
     })
-  })
-  .then( post => {
-    res.redirect(`/posts/${post.id}`);
-  })
+    .then(function(user) {
+      return user.createPost({
+        title: title,
+        content: content
+      })
+    })
+    .then(post => {
+      var user = req.session.user.username;
+      res.redirect(`/posts/${post.id}`);
+    })
 });
 
 //USERPOSTS
-app.get('/posts/user/:username', (req,res)=>{
+app.get('/posts/user/:username', (req, res) => {
   const username = req.params.username;
   User.findOne({
-    where: {
-      username: username
-    },
-    include: [{
-      model: Post},{
-      model: Comment
-    }]
-  })
-  .then(function(user){
-    // console.log(" console console console !!!!!!" + user.id)
-    // for(var i=0; i<user.posts.length; i++)
-    // console.log(" console console console !!!!!!" + user.posts[i].title)
-    res.render("userposts", {user: user, post: user.posts
+      where: {
+        username: username
+      },
+      include: [{
+        model: Post
+      }, {
+        model: Comment
+      }]
     })
-  })
+    .then(function(user) {
+      res.render("userposts", {
+        user: user,
+        post: user.posts
+      })
+    })
 })
 
 //SPECIFICPOST
-app.get('/posts/:id', function(req,res){
+app.get('/posts/:id', function(req, res) {
   const postId = req.params.id
-  console.log(postId)
-  Post.findOne({
+  // let posts;
+  let promise1 = Post.findOne({
     where: {
       id: postId
     },
     include: [{
-      model: User},{
-      model: Comment
+      model: User
     }]
   })
-  .then(function(post){
-    res.render("specificpost", {post: post})
+  let promise2 = (Comment.findAll({
+    where: {
+      postId: postId
+    },
+    include: [{
+      model: User
+    }]
+  }))
+  Promise.all([promise1, promise2])
+    .then(function(all) {
+      let post = all[0];
+      let comment = all[1]
+      console.log("-----------------------" + post + comment)
+      res.render("specificpost", {
+        post: post,
+        comment: comment
+      })
+    })
 })
-})
-app.post('/posts/:id',function(req,res){
+app.post('/posts/:id', function(req, res) {
   const post = req.params.id
   const user = req.session.user.id
   Comment.create({
-    reply: req.body.comment,
-    postId: post,
-    userId: user
-  })
-  .then((information) =>{
-    res.redirect(`/posts/${post}`)
-  })
+      reply: req.body.comment,
+      postId: post,
+      userId: user
+    })
+    .then((information) => {
+      res.redirect(`/posts/${post}`)
+    })
 })
 
 //LOGOUT
-app.get('/logout', (req, res) =>{
-  req.session.destroy(function(error){
-    if (error){
-      throw error;
+app.get('/logout', (req, res) => {
+  req.session.destroy(function(error) {
+    if (error) {
+      throw error
     }
     res.redirect('/')
   })

@@ -1,23 +1,47 @@
 <html>
-	<head>
-		<title> All Posts </title>
-	</head>
-	<body>
-    <header>
-  <h1> All Posts </h1>
-  <div class="navbar">
-    <ul>
-      <li> <a href="../posts/user/<%= user.username %>">My Posts</a></li>
-      <li> <a href="/posts/new">New Post</a></li>
-      <li> <a href="/logout">Log Out</a></li>
-    </ul>
-  </div>
-</header>
-    <p> you are logged in as <%= user.username %></p>
-		<% for(let i = 0; i < post.length; i++) { %>
-	   <h3><a href = '/posts/<%= post[i].id %>' ><%= post[i].title %></a></h3>
-     <h6><%= post[i].content %></h6>
-       <%= post[i].user.username %>
-			 <% } %>
-	</body>
+
+<head>
+	<title> All Posts </title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+</head>
+
+<body>
+	<header style="position:fixed; width:100%; z-index:99;">
+		<nav class="navbar navbar-expand-lg navbar-light bg-light">
+			<ul class="nav nav-tabs">
+				<li class="nav-item">
+					<a class="nav-link" href="/posts/user/<%= user.username %>">My Posts</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link active" href="#">All Posts</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="/posts/new">New Post</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="/logout">Log Out</a>
+				</li>
+			</ul>
+		</nav>
+	</header>
+	<div  style="background-image: url(https://images.unsplash.com/photo-1498354136128-58f790194fa7?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=8d66d0f68c7412e69612414926dbbe97&auto=format&fit=crop&w=1050&q=80);">
+		<div style="padding-top: 10%; padding-bottom:100px; width:50%; margin-left:25%">
+		<div class="list-group">
+			<% for(let i = 0; i < post.length; i++) { %>
+			<a  style="margin:1%;" href="/posts/<%= post[i].id %>" class="list-group-item list-group-item-action flex-column align-items-start">
+    <div class="d-flex w-100 justify-content-between">
+      <h5 class="mb-1"><%= post[i].title %></h5>
+      <small class="text-muted"><%= post[i].user.username %></small>
+    </div>
+    <p class="mb-1">	<%= post[i].content %></p>
+  </a>
+	<% } %>
+</div>
+</div>
+</div>
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+</body>
+
 </html>

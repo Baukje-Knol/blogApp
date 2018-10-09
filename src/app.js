@@ -4,6 +4,7 @@ const session = require('express-session')
 const bodyParser = require('body-parser')
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const app = express()
+const bcrypt = require ('bcrypt')
 const sequelize = new Sequelize({
   user: process.env.POSTGRES_USER,
   password: process.env.POSTRES_PASSWORD,
@@ -75,13 +76,15 @@ app.get('/register', (req, res) => {
   res.render('register');
 })
 app.post('/register', (req, res) => {
+  bcrypt.hash(req.body.password, 9).then( hash =>{
   User.create({
     username: req.body.username,
     email: req.body.email,
-    password: req.body.password
+    password: hash
   }).then(() => {
     res.redirect('/')
-  });
+  })
+})
 });
 
 //LOG IN
@@ -95,29 +98,32 @@ app.post('/', (req, res) => {
       where: {
         email: email
       }
-    })
-    .then(function(user) {
-      if (email !== null && password === user.password) {
-        req.session.user = user;
+    }).then((user) => {
+    bcrypt.compare(password , user.password)
+    .then(function(result){
+      if (user !== null && result) {
+        req.session.user = user
         res.redirect('/posts');
       } else {
-        res.render("login")
+        res.render("register")
       }
     })
     .catch(function(error) {
-      res.redirect('/')
-    })
+      console.log("error" + error)    })
+  })
 });
 
 //ALLPOSTS
 app.get('/posts', (req, res) => {
-  const user = req.session.user;
+     const user = req.session.user;
+
   Post.findAll({
       include: [{
         model: User
       }]
     })
     .then((post) => {
+console.log(req.session.user)
       res.render('allposts', {
         user: user,
         post: post
@@ -202,7 +208,6 @@ app.get('/posts/:id', function(req, res) {
     .then(function(all) {
       let post = all[0];
       let comment = all[1]
-      console.log("-----------------------" + post + comment)
       res.render("specificpost", {
         post: post,
         comment: comment
@@ -232,7 +237,7 @@ app.get('/logout', (req, res) => {
   })
 });
 
-sequelize.sync()
+sequelize.sync({force:false})
 const server = app.listen(2564, function() {
   console.log("port: " + server.address().port)
 })

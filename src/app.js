@@ -71,6 +71,7 @@ Comment.belongsTo(Post)
 User.hasMany(Comment)
 Comment.belongsTo(User)
 
+
 //REGISTER
 app.get('/register', (req, res) => {
   res.render('register');
@@ -86,6 +87,45 @@ app.post('/register', (req, res) => {
   })
 })
 });
+
+//registration usernamevalidation
+app.post('/usernamevalidation', (req, res) => {
+    var username = req.body.username
+    User.findOne({
+            where: {
+                username: username
+            }
+        })
+        .then(username => {
+            if (username == null) {
+                res.send(true)
+            } else {
+                res.send(false)
+            }
+        }).catch((err) => {
+            console.log(err, err.stack)
+            res.status(400).redirect('/login')
+        })
+})
+//registration emailvalidation
+app.post('/emailvalidation', (req, res) => {
+    var email = req.body.email
+    User.findOne({
+            where: {
+                email: email
+            }
+        })
+        .then(email => {
+            if (email === null) {
+                res.send(true)
+            } else {
+                res.send(false)
+            }
+        }).catch((err) => {
+            console.log(err, err.stack)
+            res.status(400).redirect('/login')
+        })
+})
 
 //LOG IN
 app.get('/', (req, res) => {
